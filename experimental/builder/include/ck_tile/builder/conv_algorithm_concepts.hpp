@@ -4,7 +4,7 @@
 #pragma once
 
 #include <type_traits>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <array>
 
 #include "ck_tile/builder/types.hpp"

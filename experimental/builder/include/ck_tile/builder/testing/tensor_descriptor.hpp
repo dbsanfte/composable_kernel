@@ -8,7 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <iosfwd>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <algorithm>
 #include <hip/hip_runtime.h>
 #include "ck_tile/builder/conv_signature_concepts.hpp"

@@ -11,8 +11,8 @@
 #include <locale>
 #include <string>
 #include <string_view>
-#include <syncstream>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_syncstream.hpp"
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <limits>
 
 /// This file contains a few debugging utilities, mainly focused around
@@ -328,13 +328,10 @@ struct TensorPrinter
         ss.seekg(0);
         ss.seekp(0);
         stringify_value(value_ptr);
-        // ss.view() returns a view of the ENTIRE buffer, which may have
-        // lingering data since we used seekp() and seekg() to reset the
-        // stream. For some reason std::stringstream works this way...
-        // Fortunately tellp() returns how many bytes we've actually
-        // written.
-        const auto view = ss.view().substr(0, ss.tellp());
-        stream.val(view);
+        // Get the string content. In C++20 we could use ss.view(), but for
+        // compatibility we use ss.str() which returns a copy.
+        const auto str = ss.str();
+        stream.val(str);
     }
 
     /// @brief Print a 1D row to a stream.

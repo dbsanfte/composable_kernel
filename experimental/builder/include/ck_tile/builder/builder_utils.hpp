@@ -5,6 +5,7 @@
 
 #include "ck/utility/sequence.hpp"
 #include "ck_tile/builder/types.hpp"
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 
 namespace ck_tile::builder {
 

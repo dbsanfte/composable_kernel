@@ -11,7 +11,7 @@
 #include "testing_utils.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <span>
+#include "ck_tile/builder/compat/compat_span.hpp"
 #include <array>
 
 namespace ckb = ck_tile::builder;

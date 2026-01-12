@@ -4,7 +4,7 @@
 #pragma once
 
 #include <hip/hip_runtime.h>
-#include <source_location>
+#include "ck_tile/builder/compat/compat_source_location.hpp"
 #include <stdexcept>
 #include <sstream>
 

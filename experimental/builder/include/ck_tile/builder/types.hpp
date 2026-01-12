@@ -6,7 +6,7 @@
 #include <ostream>
 #include <string_view>
 #include <variant>
-#include <bit>
+#include "ck_tile/builder/compat/compat_bit.hpp"
 #include <array>
 
 namespace ck_tile::builder {

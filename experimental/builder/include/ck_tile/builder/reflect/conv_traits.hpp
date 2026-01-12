@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include "ck/tensor_operation/gpu/device/convolution_backward_data_specialization.hpp"
 #include "ck/tensor_operation/gpu/device/convolution_backward_weight_specialization.hpp"
 #include "ck/tensor_operation/gpu/device/convolution_forward_specialization.hpp"

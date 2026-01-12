@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 
 #include <ck/tensor_operation/gpu/element/element_wise_operation.hpp>
 #include <ck_tile/builder/reflect/conv_traits.hpp>

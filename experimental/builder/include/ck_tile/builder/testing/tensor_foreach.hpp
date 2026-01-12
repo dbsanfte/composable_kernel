@@ -6,7 +6,7 @@
 #include "ck_tile/builder/testing/tensor_descriptor.hpp"
 #include "ck_tile/builder/factory/helpers/ck/conv_tensor_type.hpp"
 #include <cstdint>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <array>
 
 /// This file implements a generic GPU tensor "foreach" function. This

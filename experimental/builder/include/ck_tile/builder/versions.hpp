@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <string_view>
 
 #include "ck_tile/builder/builder_utils.hpp"

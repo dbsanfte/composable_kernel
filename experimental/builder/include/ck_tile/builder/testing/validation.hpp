@@ -12,7 +12,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-#include <bit>
+#include "ck_tile/builder/compat/compat_bit.hpp"
 
 /// This file implements functionality related to "validation", ie, functionality
 /// to compare tensors. The functionality in this file should be testing-framework

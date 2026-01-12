@@ -7,7 +7,7 @@
 #include <memory>
 #include <numeric>
 #include <span>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <hip/hip_runtime.h>
 #include "ck_tile/builder/conv_signature_concepts.hpp"
 #include "ck_tile/builder/factory/helpers/ck/conv_tensor_type.hpp"

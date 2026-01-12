@@ -16,7 +16,7 @@
 
 #include <string>
 #include <type_traits>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 
 namespace ck_tile::reflect {
 

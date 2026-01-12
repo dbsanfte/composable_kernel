@@ -9,7 +9,7 @@
 
 #include <array>
 #include <cmath>
-#include <concepts>
+#include "ck_tile/builder/compat/compat_concepts.hpp"
 #include <iostream>
 #include <limits.h>
 #include <ostream>

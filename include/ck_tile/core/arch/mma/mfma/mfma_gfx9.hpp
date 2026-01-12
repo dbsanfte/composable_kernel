@@ -103,6 +103,7 @@ struct amdgcn_mma<fp16_t,
     }
 };
 
+#if defined(__gfx950__)
 /**
  * @struct amdgcn_mma
  * @brief Specialization of amdgcn_mma for MFMA on GFX950 targets
@@ -158,5 +159,6 @@ struct amdgcn_mma<fp16_t,
                                                        static_cast<int>(CtrlFlags::Blgp))};
     }
 };
+#endif // defined(__gfx950__)
 
 } // namespace ck_tile::core::arch::mma
