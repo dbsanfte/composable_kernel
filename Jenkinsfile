@@ -1049,6 +1049,7 @@ def run_aiter_tests(Map conf=[:]){
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_gemm_a8w8_blockscale.py"
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_mha.py"
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_mha_varlen.py"
+                sh "python3 /home/jenkins/workspace/aiter/op_tests/test_batch_prefill.py"
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_moe.py"
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_moe_2stage.py"
                 sh "python3 /home/jenkins/workspace/aiter/op_tests/test_moe_blockscale.py"
