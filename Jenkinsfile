@@ -574,6 +574,8 @@ def cmake_build(Map conf=[:]){
     def setup_cmd
     def build_cmd
     def execute_cmd = conf.get("execute_cmd", "")
+    //check the node gpu architecture
+    def arch_name = check_arch_name()
     if(!setup_args.contains("NO_CK_BUILD")){
         if (params.NINJA_BUILD_TRACE) {
             echo "running ninja build trace"
@@ -646,15 +648,15 @@ def cmake_build(Map conf=[:]){
 
         //run tests except when NO_CK_BUILD or BUILD_LEGACY_OS are set
         if(!setup_args.contains("NO_CK_BUILD") && !params.BUILD_LEGACY_OS){
-            sh "python3 ../script/ninja_json_converter.py .ninja_log --legacy-format --output ck_build_trace_${check_arch_name()}.json"
-            archiveArtifacts "ck_build_trace_${check_arch_name()}.json"
-            sh "python3 ../script/parse_ninja_trace.py ck_build_trace_${check_arch_name()}.json"
+            sh "python3 ../script/ninja_json_converter.py .ninja_log --legacy-format --output ck_build_trace_${arch_name}.json"
+            archiveArtifacts "ck_build_trace_${arch_name}.json"
+            sh "python3 ../script/parse_ninja_trace.py ck_build_trace_${arch_name}.json"
             if (params.NINJA_BUILD_TRACE || params.BUILD_INSTANCES_ONLY){
                 if (params.NINJA_FTIME_TRACE) {
                     echo "running ClangBuildAnalyzer"
                     sh "/ClangBuildAnalyzer/build/ClangBuildAnalyzer  --all . clang_build.log"
-                    sh "/ClangBuildAnalyzer/build/ClangBuildAnalyzer  --analyze clang_build.log > clang_build_analysis_${check_arch_name()}.log"
-                    archiveArtifacts "clang_build_analysis_${check_arch_name()}.log"
+                    sh "/ClangBuildAnalyzer/build/ClangBuildAnalyzer  --analyze clang_build.log > clang_build_analysis_${arch_name}.log"
+                    archiveArtifacts "clang_build_analysis_${arch_name}.log"
                 }
 
 
@@ -672,8 +674,8 @@ def cmake_build(Map conf=[:]){
                     if(params.BUILD_PACKAGES){
                         echo "Build ckProfiler packages"
                         sh 'ninja -j64 package'
-                        sh "mv composablekernel-ckprofiler_*.deb composablekernel-ckprofiler_1.2.0_amd64_${check_arch_name()}.deb"
-                        stash includes: "composablekernel-ckprofiler**.deb", name: "profiler_package_${check_arch_name()}"
+                        sh "mv composablekernel-ckprofiler_*.deb composablekernel-ckprofiler_1.2.0_amd64_${arch_name}.deb"
+                        stash includes: "composablekernel-ckprofiler**.deb", name: "profiler_package_${arch_name}"
                     }
                 }
                 if(params.BUILD_INSTANCES_ONLY){
@@ -699,16 +701,14 @@ def cmake_build(Map conf=[:]){
                     if(params.BUILD_PACKAGES){
                         echo "Build ckProfiler packages"
                         sh 'ninja -j64 package'
-                        sh "mv composablekernel-ckprofiler_*.deb composablekernel-ckprofiler_1.2.0_amd64_${check_arch_name()}.deb"
-                        stash includes: "composablekernel-ckprofiler**.deb", name: "profiler_package_${check_arch_name()}"
+                        sh "mv composablekernel-ckprofiler_*.deb composablekernel-ckprofiler_1.2.0_amd64_${arch_name}.deb"
+                        stash includes: "composablekernel-ckprofiler**.deb", name: "profiler_package_${arch_name}"
                     }
                 }
             }
         }
     }
 
-    //check the node gpu architecture
-    def arch_name = check_arch_name()
     if (params.RUN_CK_TILE_FMHA_TESTS){
         try{
             archiveArtifacts "perf_fmha_*.log"
@@ -797,55 +797,26 @@ def Build_CK(Map conf=[:]){
                     // run performance tests, stash the logs, results will be processed on the master node
 					dir("script"){
                         if (params.RUN_PERFORMANCE_TESTS){
-                        if (params.RUN_FULL_QA && (arch == "gfx90a" || arch == "gfx942")){
+                        if (params.RUN_FULL_QA && (arch == "gfx90a" || arch == "gfx942" || arch == "gfx950")){
                             // run full tests on gfx90a or gfx942
                             echo "Run full performance tests"
                             sh "./run_full_performance_tests.sh 0 QA_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} ${arch}"
                             archiveArtifacts "perf_*.log"
                             stash includes: "perf_**.log", name: "perf_log_${arch}"
                         }
-                        else if (!params.RUN_FULL_QA && (arch == "gfx90a" || arch == "gfx942")){
+                        else if (!params.RUN_FULL_QA && (arch == "gfx90a" || arch == "gfx942" || arch == "gfx950")){
                             // run standard tests on gfx90a or gfx942
                             echo "Run performance tests"
                             sh "./run_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} ${arch}"
                             archiveArtifacts "perf_*.log"
                             stash includes: "perf_**.log", name: "perf_log_${arch}"
                         }
-                        // disable performance tests on gfx1030 for now.
-                        //else if ( arch == "gfx10"){
-                            // run basic tests on gfx1030
-                        //    echo "Run gemm performance tests"
-                        //    sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} gfx10"
-                        //    archiveArtifacts "perf_onnx_gemm_gfx10.log"
-                        //    stash includes: "perf_onnx_gemm_gfx10.log", name: "perf_log_gfx10"
-                        //}
-                        else if ( arch == "gfx11"){
-                            // run basic tests on gfx11
+                        else if ( arch != "gfx10"){
+                            // run basic tests on gfx11/gfx12/gfx908/gfx950, but not on gfx10, it takes too long
                             echo "Run gemm performance tests"
-                            sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} gfx11"
-                            archiveArtifacts "perf_onnx_gemm_gfx11.log"
-                            stash includes: "perf_onnx_gemm_gfx11.log", name: "perf_log_gfx11"
-                        }
-                        else if ( arch == "gfx120" ){
-                            // run basic tests on gfx12
-                            echo "Run gemm performance tests"
-                            sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} gfx12"
-                            archiveArtifacts "perf_onnx_gemm_gfx12.log"
-                            stash includes: "perf_onnx_gemm_gfx12.log", name: "perf_log_gfx12"
-                        }
-                        else if ( arch == "gfx908" ){
-                            // run basic tests on gfx908
-                            echo "Run performance tests"
-                            sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} gfx908"
-                            archiveArtifacts "perf_onnx_gemm_gfx908.log"
-                            stash includes: "perf_onnx_gemm_gfx908.log", name: "perf_log_gfx908"
-                        }
-                        else if ( arch == "gfx950" ){
-                            // run basic tests on gfx950
-                            echo "Run performance tests"
-                            sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} gfx950"
-                            archiveArtifacts "perf_onnx_gemm_gfx950.log"
-                            stash includes: "perf_onnx_gemm_gfx950.log", name: "perf_log_gfx950"
+                            sh "./run_gemm_performance_tests.sh 0 CI_${params.COMPILER_VERSION} ${env.BRANCH_NAME} ${NODE_NAME} ${arch}"
+                            archiveArtifacts "perf_onnx_gemm_*.log"
+                            stash includes: "perf_onnx_gemm_**.log", name: "perf_log_${arch}"
                         }
                         }
                     }
@@ -862,7 +833,6 @@ def Build_CK(Map conf=[:]){
                         dir("rocm-libraries/projects/hiptensor"){
                             sh """#!/bin/bash
                                 mkdir -p build
-                                ls -ltr
                                 CC=hipcc CXX=hipcc cmake -Bbuild . -D CMAKE_PREFIX_PATH="${env.WORKSPACE}/install"
                                 cmake --build build -- -j
                                 ctest --test-dir build
