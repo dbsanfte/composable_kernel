@@ -118,7 +118,7 @@ struct UniversalGemmKernelArgs
     index_t stride_E;
     index_t k_batch;
     /// @brief Persistent async input scheduler for chunk-based tile scheduling.
-    PersistentAsyncInputScheduler async_input_scheduler;
+    PersistentAsyncInputScheduler async_input_scheduler = {};
 };
 
 /// @brief The Universal GEMM kernel template.
