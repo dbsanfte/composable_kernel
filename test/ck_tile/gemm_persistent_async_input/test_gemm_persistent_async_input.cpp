@@ -9,6 +9,9 @@
 #include "ck_tile/host/kernel_launch.hpp"
 #include "ck_tile/core/utility/persistent_async_input_scheduler.hpp"
 
+#include <chrono>
+#include <thread>
+
 using Row = ck_tile::tensor_layout::gemm::RowMajor;
 using Col = ck_tile::tensor_layout::gemm::ColumnMajor;
 using F16 = ck_tile::fp16_t;
@@ -193,15 +196,33 @@ class TestGemmPersistentAsyncInput : public ::testing::Test
             return;
         }
 
+        // Create a separate stream for setting signals
+        // Using the same stream would deadlock - memcpy waits for kernel, kernel waits for signal
+        hipStream_t signal_stream;
+        HIP_CHECK_ERROR(hipStreamCreateWithFlags(&signal_stream, hipStreamNonBlocking));
+
         // Launch kernel
         ck_tile::ignore = ck_tile::launch_kernel(
             stream_cfg,
             ck_tile::make_kernel<kBlockPerCu>(Kernel{}, grids, blocks, 0, kargs));
 
-        // Simulate setting chunk signals (would normally be done by producer)
-        // For testing, we just set all signals to allow kernel completion
-        std::vector<uint32_t> host_signals(num_chunks, 1);
-        signal_buf.ToDevice(host_signals.data());
+        // Simulate producer setting chunk signals with interleaved sleep
+        // This simulates async input becoming available over time
+        const int sleep_us = 100; // microseconds between chunks
+        for(ck_tile::index_t i = 0; i < num_chunks; ++i)
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds(sleep_us));
+            const uint32_t signal_val = 1;
+            HIP_CHECK_ERROR(hipMemcpyAsync(d_chunk_signals + i,
+                                           &signal_val,
+                                           sizeof(uint32_t),
+                                           hipMemcpyHostToDevice,
+                                           signal_stream));
+        }
+
+        // Wait for all signals to be set
+        HIP_CHECK_ERROR(hipStreamSynchronize(signal_stream));
+        HIP_CHECK_ERROR(hipStreamDestroy(signal_stream));
 
         // Wait for kernel completion
         HIP_CHECK_ERROR(hipDeviceSynchronize());
